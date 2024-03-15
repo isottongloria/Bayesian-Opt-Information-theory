@@ -12,3 +12,7 @@ Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) method:
 - https://en.wikipedia.org/wiki/Quasi-Newton_method
 - https://en.wikipedia.org/wiki/Broyden%E2%80%93Fletcher%E2%80%93Goldfarb%E2%80%93Shanno_algorithm
 - https://github.com/trsav/bfgs/blob/master/BFGS.py
+
+tutorial bayesian optimization:
+
+https://arxiv.org/pdf/1807.02811.pdf
