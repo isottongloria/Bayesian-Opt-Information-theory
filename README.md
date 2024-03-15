@@ -16,3 +16,8 @@ Broyden–Fletcher–Goldfarb–Shanno (L-BFGS) method:
 tutorial bayesian optimization:
 
 https://arxiv.org/pdf/1807.02811.pdf
+
+
+Bayesian MC (?):
+
+https://www.sciencedirect.com/science/article/pii/S0951832010000992
