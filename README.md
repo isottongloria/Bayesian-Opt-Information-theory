@@ -21,3 +21,8 @@ tutorial bayesian optimization:
 Bayesian MC (?):
 
 - https://www.sciencedirect.com/science/article/pii/S0951832010000992
+
+
+Sequential MC:
+- https://jblevins.org/notes/smc-intro
+- https://diglib.eg.org/bitstream/handle/10.2312/SCA.SCA10.103-112/103-112.pdf?sequence=1&isAllowed=y
