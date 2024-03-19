@@ -27,6 +27,9 @@ Sequential MC:
 - https://jblevins.org/notes/smc-intro
 - https://diglib.eg.org/bitstream/handle/10.2312/SCA.SCA10.103-112/103-112.pdf?sequence=1&isAllowed=y
 
+Vihola algorithm
+- https://www.slideshare.net/xianblog/vihola
+  
 Source code likelihood optimization 
 - https://github.com/scikit-learn/scikit-learn/blob/f07e0138bfee41cd2c0a5d0251dc3fe03e6e1084/sklearn/gaussian_process/_gpr.py
 -             # Additional runs are performed from log-uniform chosen initial
