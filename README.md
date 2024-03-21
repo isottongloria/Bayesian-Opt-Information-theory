@@ -1,8 +1,25 @@
-# Bayesian-Opt-Information-theory
+# Bayesian Optimization 
 
 ![Example GIF](https://github.com/Sara-Munafo/Bayesian-Opt-Information-theory/blob/main/simple_optimization_ei.gif)
 
-This repository contains the implementation of the Bayesian Optimization method for hyperparameters tuning, a project for the course of Information theory and Inference of the Master's degree in Physics of Data at University of padua.
+Welcome to the Bayesian Optimization repository! This project focuses on implementing the Bayesian Optimization method for fine-tuning hyperparameters. It is developed as part of the coursework for the Information Theory and Inference module of the Master's degree program in Physics of Data at the University of Padua.
+
+## About
+
+Bayesian Optimization is ...
+
+
+## Getting Started
+
+
+## Contact
+
+For any inquiries or questions regarding this project, feel free to contact us:
+- [Divari Carlo](mailto:carlo.divari@studenti.unipd.it)
+- [Isotton Gloria](mailto:gloria.isotton@studenti.unipd.it)
+- [Sara Munafò](mailto:sara.munafo@studenti.unipd.it)
+
+
 
 
 useful links:
