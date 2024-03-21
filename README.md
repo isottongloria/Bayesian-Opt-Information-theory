@@ -35,4 +35,4 @@ Sequential MC:
 
 Vihola algorithm
 - https://www.slideshare.net/xianblog/vihola
-  
+- https://link.springer.com/article/10.1007/s11222-011-9269-5
