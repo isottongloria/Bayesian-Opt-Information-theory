@@ -1,3 +1,7 @@
+
+# Slides
+https://docs.google.com/presentation/d/1LfFytOBxcLFXgyDTgRGx3bXTWXQXZCVcOCvHQNfoPts/edit?usp=sharing
+
 # Bayesian Optimization 
 
 ![Example GIF](https://github.com/Sara-Munafo/Bayesian-Opt-Information-theory/blob/main/simple_optimization_ei.gif)
