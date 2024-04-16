@@ -93,6 +93,10 @@ def expected_i(x, gp_model, best_y):
     
     
 
+
+
+
+# Sequential Monte-carlo for hyperparameter tuning
 def smc(x,y,N,k_dim,T, var):
     '''Parameters:
     
@@ -100,8 +104,8 @@ def smc(x,y,N,k_dim,T, var):
     - y = sample of y
     - N = number of samples for smc
     - k_dim = number of hyperparameters
-    - T = 
-    - var = T/100
+    - T = number of time steps for smc
+    - var = variance of prior for theta
     
     Output: theta_best = optimized hyperparameters'''
     
@@ -143,9 +147,14 @@ def smc(x,y,N,k_dim,T, var):
     return theta_best
     
     
+   
+   
+   
+   
     
 # Plot functions
 
+#DIMENSION 1
 def plot_1D(matriX, my_blackbox, improv, y_pred, y_std, sample_x, sample_y, new_x, new_y,x_min, x_max, y_min, y_max):
     '''
     Args:
@@ -203,23 +212,79 @@ def make_gif(folder_path, frames, gif_name, duration):
             image = imageio.imread(os.path.join(folder_path, frame))
             writer.append_data(image)
 
+
+#DIMENSION 2
+def plot_3d_surface_variance(x1,x2, y_values, y_std, folder_path, name):
+    """Plots a 3d interactive plot of the 2d surface
+
+    Args:
+        x1 (ndarray of shape n*n): range of values in the x1 axis
+        x2 (ndarray of shape n*n) : range of values in the x2 axis
+        y_values (ndarray of lenght n): predicted values of y for each pair (x1,x2) obtained from the Gaussian process model
+        y_std (ndarray of lenght n): standard deviation associated with the predictions obtained from the Gaussian Process model
+    """    
+    
+    y_values_reshaped = y_values.reshape(x1.shape)
+    y_std_reshaped = y_std.reshape(x1.shape)
+
+    fig = go.Figure(data=[go.Surface(x=x1, y=x2, z=y_values_reshaped, colorscale='Viridis', name='ypred')])
+
+    fig.add_trace(go.Surface(x=x1, y=x2, z=y_values_reshaped + y_std_reshaped, colorscale='Viridis',showscale=False, opacity=0.6, name='ypred + y_std'))
+    fig.add_trace(go.Surface(x=x1, y=x2, z=y_values_reshaped - y_std_reshaped, colorscale='Viridis',showscale=False, opacity=0.6, name='ypred - y_std'))
+
+    # Set layout
+    fig.update_layout(scene=dict(
+                        xaxis_title='Learning rate',
+                        yaxis_title='Batch size',
+                        zaxis_title='Acquisition function'))
+    
+    # Show plot
+    fig.show()
+    fig_path = os.path.join(folder_path, name)
+    fig.write_image(fig_path)
+
+
+
+# DIMENSION 1 MULTILAYER PERCEPTRON
+def plot_MLP(matriX, y_pred, y_std, sample_x, sample_y,i):
+    """
+    Args:
+        matriX (ndarray of shape [n*n, 1]): range of values in the x-axis where the functions will be plotted
+        y_pred (ndarray of lenght n): predicted values obtained from the Gaussian Process model
+	y_std(ndarray of lenght n): standard deviation associated with the predictions obtained from the Gaussian Process model
+        sample_x (ndarray of lenght n_sample) and sample_y (ndarray of lenght n_sample): hold the coordinates of the previously sampled points used to train the surrogate model, included new points
+    """    ''''''
+    plt.fill_between(matriX, y_pred - 2*y_std, y_pred + 2*y_std, color='blue', alpha=0.2)
+    plt.plot(matriX, y_pred, color='blue', label='Gaussian Process', alpha=0.7, linewidth=2)
+    plt.scatter(sample_x[:-1], sample_y[:-1], color='red', label='Previous Points')
+    plt.scatter(sample_x[-1],sample_y[-1], color='green', label='New Points')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title(f"Iteration #{i+1}")
+    plt.legend()
+    plt.grid()
+    
+
+
+
+
+
 # optimization algorithm for branin and for the simple function
 def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations: int, acquisition, N, T, var,  folder_path:str, gif_name:str,gif_dur,x1=None,x2=None):
 
-    """_summary_
+    """Bayesian optimization algorithm
 
     Args:
-        x_grid (_type_): grid for x locations (1d or 2d)
+        x_grid : grid for x locations (1d or 2d)
         x : sample of x points
-        y (_type_): observed sample values
-        x1 (_type_): _description_
-        x2 (_type_): _description_
-        num_iterations (_type_): _description_
-        acquisition (_type_): _description_
-        N (_type_): _description_
-        T (_type_): _description_
-        var (_type_): _description_
-        k_dim (_type_): _description_
+        y : observed sample values
+        x1 : range of x1 (if in 2d)
+        x2 : range of x2 (if in 2d)
+        num_iterations : number of iterations
+        acquisition : 0 for ei acquisition function, 1 for pi acquisition function
+        N : number of samples for smc 
+        T : Number of time steps for smc
+        var : variance of prior for smc
         folder_path: folder to save images and gifs in
         gif_name: name of 1d gif or 2d plot
         gif_dur: length of each frame in 1d gif
@@ -231,7 +296,8 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
     x_max = max(x) + 1
 
     #dimension of parameters vector
-    d = x.reshape(-1,1).shape[1]
+    
+    d = x.shape[1]
     theta_best = [1.0]*(d+1) #initial hyperpars of kernel
     kernel = theta_best[0]**2 * Matern(length_scale=theta_best[1:], nu=1.5)
     
@@ -325,4 +391,135 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
         
     print('Optimized theta: ', gp_model.kernel_)
     return(x,y)
+
+
+
+
+
+
+
+
+# FOR THE APPLICATION TO THE MULTILAYER PERCEPTRON
+
+#Blackbox funcyion
+def blackbox_mlp(theta, X_train,y_train, X_test,y_test):
+    '''Returns the score of the MLP in the classification task, as a function of the hyperparameters of the NN
+    Args:
+        theta (2D array) : hyperparameters vector (learning_rate_init) if 1D, (learning_rate_init, batch_size) if 2D
+    '''
+    if len(theta)==2:
+        mlp = MLPClassifier(max_iter=100, alpha=1e-4, solver='sgd',
+                        tol=1e-4, random_state=2072380, learning_rate_init=theta[0], hidden_layer_sizes=(20,20),\
+                            batch_size=int(theta[1])).fit(X_train,y_train)
+        mlp.predict(X_test)
+    
+    if len(theta)==1:
+        mlp = MLPClassifier(max_iter=100, 
+                            alpha=1e-4, 
+                            solver='sgd',
+                            tol=1e-4, 
+                            random_state=2072380, 
+                            learning_rate_init=theta[0], 
+                            hidden_layer_sizes=(20,20)).fit(X_train,y_train)
+        mlp.predict(X_test) 
+    return mlp.score(X_test,y_test)
+
+
+
+
+#Optimization function
+def optimize_MLP(x_grid,x,y,x1,x2,X_train,y_train, X_test,y_test,num_iterations,acquisition, N,T,var,folder_path:str,name:str,gif_dur):
+
+    """Bayesian optimization applied to the Multi layer perceptron
+
+    Args:
+        x_grid : grid for x locations (1d or 2d)
+        x : sample of x points
+        y : observed sample values
+        x1 : range of x1 (if in 2d)
+        x2 : range of x2 (if in 2d)
+        X_train,y_train : training dataset
+        X_test,y_test : test dataset
+        num_iterations : number of iterations
+        acquisition : 0 for ei acquisition function, 1 for pi acquisition function
+        N : number of samples for smc 
+        T : Number of time steps for smc
+        var : variance of prior for smc
+        folder_path: folder to save images and gifs in
+        gif_name: name of 1d gif or 2d plot
+        gif_dur: length of each frame in 1d gif
+        
+    """    
+
+
+    #dimension of parameters vector
+    d = x.shape[1]
+    theta_best = [1.0]*(d+1) #initial hyperpars of kernel
+    
+    #set plot for 1d gif:
+    if (d==1):
+        frames = []
+        plt.figure(figsize=(10, 6))
+    
+        
+    for i in range(num_iterations):
+        if (i%10==0):
+            print('Iteration number : ', i)
+
+        #Manually update kernel hyperparameters
+        kernel = theta_best[0]**2 * Matern(length_scale=theta_best[1:], nu=1.5)
+        gp_model = GaussianProcessRegressor(kernel=kernel, alpha=1e-5, optimizer= None)
+            
+        # Fit the Gaussian process model to the sampled points
+        gp_model.fit(x.reshape(-1,d),y)
+    
+        # Determine the point with the highest observed function value
+        best_idx = np.argmax(y)
+        best_x = x[best_idx]
+        best_y = y[best_idx]
+    
+        # Generate the acquisition function using the Gaussian process model
+        y_pred, y_std = gp_model.predict(x_grid.reshape(-1,d), return_std=True)
+                                         
+        if acquisition==0:
+            improv = expected_i(x_grid.reshape(-1, d),gp_model,best_y)
+        else:
+            improv = prob_i(x_grid.reshape(-1, d),gp_model,best_y)
+            
+        
+        if i < num_iterations - 1:
+            new_x = x_grid[np.argmax(improv)].reshape(-1,d)  # Select the next point based on
+            new_y = blackbox_mlp(new_x[0],X_train,y_train, X_test,y_test)
+            x = np.concatenate((x, new_x))
+            y = np.append(y, new_y)
+        
+
+        #Optimize hyperpars with smc
+        theta_best = smc(x,y,N,d+1,T,var)
+        
+        # Save frame for 1d gif
+        if x.shape[1]==1:
+            plot_MLP(x_grid, y_pred, y_std, x, y, i)
+            filename = f"frame_{i}.png"
+            plt.savefig(os.path.join(folder_path, filename))
+            frames.append(filename)
+            plt.clf()  # Clear current figure
+    
+
+
+    if x.shape[1]==1:
+    # Create the GIF using the frames saved in the specified folder
+        make_gif(folder_path, frames, name, gif_dur)
+        # Remove the saved frames
+        for frame_file in frames:
+            os.remove(os.path.join(folder_path, frame_file))
+    if x.shape[1]==2:
+        # Final plot
+        plot_3d_surface_variance(x1,x2, y_pred,y_std, folder_path,name)
+
+
+        
+    print('Optimized theta: ', gp_model.kernel_)
+    return(x,y)
+
 
