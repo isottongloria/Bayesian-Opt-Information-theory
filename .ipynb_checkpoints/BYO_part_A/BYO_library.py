@@ -238,31 +238,44 @@ def plot_3d_surface_variance(x1,x2, y_values, y_std, folder_path, name):
                         yaxis_title='Batch size',
                         zaxis_title='Acquisition function'))
     
-    # Show plot
-    fig.show()
+    # Show and save plot
+    # fig.show()
     fig_path = os.path.join(folder_path, name)
     fig.write_image(fig_path)
 
 
 
 # DIMENSION 1 MULTILAYER PERCEPTRON
-def plot_MLP(matriX, y_pred, y_std, sample_x, sample_y,i):
+def plot_MLP(matriX, y_pred, y_std, improv,  sample_x, sample_y,i):
     """
     Args:
         matriX (ndarray of shape [n*n, 1]): range of values in the x-axis where the functions will be plotted
         y_pred (ndarray of lenght n): predicted values obtained from the Gaussian Process model
 	y_std(ndarray of lenght n): standard deviation associated with the predictions obtained from the Gaussian Process model
+	improv (array n): output of the acquisiton function
         sample_x (ndarray of lenght n_sample) and sample_y (ndarray of lenght n_sample): hold the coordinates of the previously sampled points used to train the surrogate model, included new points
     """    ''''''
-    plt.fill_between(matriX, y_pred - 2*y_std, y_pred + 2*y_std, color='blue', alpha=0.2)
-    plt.plot(matriX, y_pred, color='blue', label='Gaussian Process', alpha=0.7, linewidth=2)
-    plt.scatter(sample_x[:-1], sample_y[:-1], color='red', label='Previous Points')
-    plt.scatter(sample_x[-1],sample_y[-1], color='green', label='New Points')
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.title(f"Iteration #{i+1}")
-    plt.legend()
-    plt.grid()
+   
+    
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
+
+    
+    ax1.fill_between(matriX, y_pred - 2*y_std, y_pred + 2*y_std, color='blue', alpha=0.2)
+    ax1.plot(matriX, y_pred, color='blue', label='Gaussian Process', alpha=0.7, linewidth=2)
+    ax1.scatter(sample_x[:-1], sample_y[:-1], color='red', label='Previous Points')
+    ax1.scatter(sample_x[-1],sample_y[-1], color='green', label='New Points')
+    ax1.set_xlabel('x')
+    ax1.set_ylabel('y')
+    ax1.set_title(f"Iteration #{i+1}")
+    
+   
+    ax2.plot(matriX, improv, color='red', linestyle='dashed', label='Acquisition Function', alpha=0.8)
+    ax2.grid('--', linewidth = 0.3, color = 'grey')
+    #ax2.set_ylim(-0.01,0.1)
+    ax2.axvline(x=sample_x[-1], color='green', linewidth=1.5)  
+    
+    ax1.legend()
+    plt.tight_layout()
     
 
 
@@ -499,7 +512,7 @@ def optimize_MLP(x_grid,x,y,x1,x2,X_train,y_train, X_test,y_test,num_iterations,
         
         # Save frame for 1d gif
         if x.shape[1]==1:
-            plot_MLP(x_grid, y_pred, y_std, x, y, i)
+            plot_MLP(x_grid, y_pred, y_std, improv, x, y, i)
             filename = f"frame_{i}.png"
             plt.savefig(os.path.join(folder_path, filename))
             frames.append(filename)
