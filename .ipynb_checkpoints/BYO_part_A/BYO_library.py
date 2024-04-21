@@ -14,6 +14,7 @@ np.random.seed(42)                                            # Set random seed 
 from sklearn.neural_network import MLPClassifier   # Classification problem
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
+import kaleido
 
 
 class BlackBox:
@@ -45,11 +46,7 @@ class BlackBox:
                 t: float) -> np.ndarray:
         Hb = np.zeros_like(x1, dtype=float)
         Hb = a * (x2 - b * (x1 ** 2) + c * x1 - r) ** 2 + s * (1 - t) * np.cos(x1) + s
-        return Hb
-
-
-        return y_values
-        
+        return Hb        
         
         
 # Acquisition function
@@ -251,8 +248,8 @@ def plot_MLP(matriX, y_pred, y_std, improv,  sample_x, sample_y,i):
     Args:
         matriX (ndarray of shape [n*n, 1]): range of values in the x-axis where the functions will be plotted
         y_pred (ndarray of lenght n): predicted values obtained from the Gaussian Process model
-	y_std(ndarray of lenght n): standard deviation associated with the predictions obtained from the Gaussian Process model
-	improv (array n): output of the acquisiton function
+	    y_std(ndarray of lenght n): standard deviation associated with the predictions obtained from the Gaussian Process model
+	    improv (array n): output of the acquisiton function
         sample_x (ndarray of lenght n_sample) and sample_y (ndarray of lenght n_sample): hold the coordinates of the previously sampled points used to train the surrogate model, included new points
     """    ''''''
    
@@ -276,30 +273,23 @@ def plot_MLP(matriX, y_pred, y_std, improv,  sample_x, sample_y,i):
     
     ax1.legend()
     plt.tight_layout()
-    
 
 
+def bysn_1D(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations: int, acquisition, N, T, var,  folder_path:str, gif_name:str,gif_dur,x1=None,x2=None):
 
-
-
-# optimization algorithm for branin and for the simple function
-def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations: int, acquisition, N, T, var,  folder_path:str, gif_name:str,gif_dur,x1=None,x2=None):
-
-    """Bayesian optimization algorithm
+    """Bayesian optimization algorithm in 1 dimension testing on simple function
 
     Args:
-        x_grid : grid for x locations (1d or 2d)
+        x_grid : grid for x locations 
         x : sample of x points
         y : observed sample values
-        x1 : range of x1 (if in 2d)
-        x2 : range of x2 (if in 2d)
         num_iterations : number of iterations
         acquisition : 0 for ei acquisition function, 1 for pi acquisition function
         N : number of samples for smc 
         T : Number of time steps for smc
         var : variance of prior for smc
         folder_path: folder to save images and gifs in
-        gif_name: name of 1d gif or 2d plot
+        gif_name: name of 1d gif
         gif_dur: length of each frame in 1d gif
     """    
 
@@ -308,6 +298,8 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
     x_min = min(x) - 1
     x_max = max(x) + 1
 
+    loss_1d =[]
+    simple_max=1.125
     #dimension of parameters vector
     
     d = x.shape[1]
@@ -322,7 +314,6 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
     if (optimizer=="fmin_l_bfgs_b"):
         gp_model = GaussianProcessRegressor(kernel=kernel, alpha=1e-5, optimizer= "fmin_l_bfgs_b")
     
-
 
     for i in range(num_iterations):
         if (i%10==0):
@@ -340,10 +331,10 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
         best_idx = np.argmax(y)
         best_x = x[best_idx]
         best_y = y[best_idx]
-    
+        loss_1d.append(simple_max-best_y)
         # Generate the acquisition function using the Gaussian process model
         y_pred, y_std = gp_model.predict(x_grid.reshape(-1,d), return_std=True)
-                                         
+                                 
         if acquisition==0:
             improv = expected_i(x_grid.reshape(-1, d),gp_model,best_y)
         else:
@@ -355,16 +346,6 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
             if d==1:
                 new_y = my_blackbox.simple_func(new_x[0])
                 x = np.append(x, new_x)
-            if d==2:
-                new_y= my_blackbox.branin(x1,
-                                          x2,
-                                          my_blackbox.a,
-                                          my_blackbox.b,
-                                          my_blackbox.c,
-                                          my_blackbox.r,
-                                          my_blackbox.s,
-                                          my_blackbox.t)
-                x = np.concatenate((x, new_x))
             y = np.append(y, new_y)
 		
         if (optimizer=="smc"):
@@ -388,27 +369,98 @@ def optimize_d12(x_grid,x,y,my_blackbox: BlackBox,optimizer: str,num_iterations:
             frames.append(filename)
             plt.clf()  # Clear current figure
     
-
-
     if d==1:
     # Create the GIF using the frames saved in the specified folder
         make_gif(folder_path, frames, gif_name, gif_dur)
         # Remove the saved frames
         for frame_file in frames:
             os.remove(os.path.join(folder_path, frame_file))
-    if d==2:
-        # Final plot
-        plot_3d_surface_variance(x1,x2, y_pred,y_std, folder_path,name)
+        
+    print('Optimized theta: ', gp_model.kernel_)
+    return x,y,loss_1d
+
+
+def bysn_2d(x,y,x1,x2,my_blackbox: BlackBox,optimizer: str, num_iterations: int, acquisition, folder_path:str, name: str, N:int = 0, T:int = 0, var = 0):
+
+    """Bayesian optimization algorithm
+
+    Args:
+        x_grid : grid for x locations (1d or 2d)
+        x : sample of x points
+        y : observed sample values
+        x1 : range of x1 (if in 2d)
+        x2 : range of x2 (if in 2d)
+        num_iterations : number of iterations
+        acquisition : 0 for ei acquisition function, 1 for pi acquisition function
+        N : number of samples for smc 
+        T : Number of time steps for smc
+        var : variance of prior for smc
+        folder_path: folder to save images and gifs in
+        gif_name: name of 1d gif or 2d plot
+        gif_dur: length of each frame in 1d gif
+    """    
+    loss = []
+    branin_max = 308.12909601160663
+    x_grid = np.column_stack((x1.ravel(),x2.ravel()))
+
+    #dimension of parameters vector
+    d = x.shape[1]
+    theta_best = [1.0]*(d+1) #initial hyperpars of kernel
+
+    if (optimizer=="fmin_l_bfgs_b"):
+        kernel = theta_best[0]**2 * Matern(length_scale=theta_best[1:], nu=1.5)
+        gp_model = GaussianProcessRegressor(kernel=kernel, alpha=1e-5, optimizer= "fmin_l_bfgs_b")
+
+    for i in range(num_iterations):
+        if (i%10==0):
+            print('Iteration number : ', i)
+        
+        if (optimizer=='smc'):
+            kernel = theta_best[0]**2 * Matern(length_scale=theta_best[1:], nu=1.5)
+            gp_model = GaussianProcessRegressor(kernel=kernel, alpha=1e-5, optimizer=None)
+
+        # Fit the Gaussian process model to the sampled points
+        gp_model.fit(x.reshape(-1,d),y)
+    
+        # Generate the acquisition function using the Gaussian process model
+        
+        # Determine the point with the highest observed function value
+        best_idx = np.argmax(y)
+        best_y = y[best_idx]
+        loss.append(branin_max-best_y)
+    
+        y_pred, y_std = gp_model.predict(x_grid.reshape(-1,d), return_std=True) 
+
+        if acquisition==0:
+            improv = expected_i(x_grid.reshape(-1, d),gp_model,best_y)
+        else:
+            improv = prob_i(x_grid.reshape(-1, d),gp_model,best_y)
+            
+        if i < num_iterations - 1:
+            new_x = x_grid[np.argmax(improv)].reshape(-1,d)
+            # Select the next point based on acquisition function
+            new_y = my_blackbox.branin(new_x[0,0],
+                                       new_x[0,1],
+                                       my_blackbox.a,
+                                       my_blackbox.b,
+                                       my_blackbox.c,
+                                       my_blackbox.r,
+                                       my_blackbox.s,
+                                       my_blackbox.t)
+            x = np.concatenate((x, new_x))
+            y = np.append(y, new_y)
+        
+        if (optimizer=="smc"):
+            #Optimize hyperparameters with smc
+            theta_best = smc(x,y,N,d+1,T,var)
+
+    plot_3d_surface_variance(x1,x2, y_pred,y_std, folder_path,name)
 
 
         
     print('Optimized theta: ', gp_model.kernel_)
-    return(x,y)
-
-
-
-
-
+    return(x,y,loss)
+            
 
 
 
