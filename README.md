@@ -1,7 +1,4 @@
 
-# Slides
-https://docs.google.com/presentation/d/1LfFytOBxcLFXgyDTgRGx3bXTWXQXZCVcOCvHQNfoPts/edit?usp=sharing
-
 # Bayesian Optimization 
 
 ![Example GIF](https://github.com/Sara-Munafo/Bayesian-Opt-Information-theory/blob/main/simple_optimization_ei.gif)
@@ -10,34 +7,27 @@ Welcome to the Bayesian Optimization repository! This project focuses on impleme
 
 ## About
 
-Bayesian Optimization is ...
-
+This study delves into utilizing Bayesian optimization to enhance the performance of one-dimensional and two-dimensional functions with known analytical expressions. Our methodology involves implementing acquisition functions such as expected improvement and probability of improvement, along with maximum likelihood estimates and sequential Monte Carlo algorithms, to refine the kernel hyperparameters. Furthermore, we extend this methodology to improve a basic image classification algorithm in machine learning.
 
 ## Getting Started
-
+- BYO_final.ipynb: jupyter notebook with the whole implementation;
+- BYO_library.py: library of the functions we used in the notebook.
 
 ## Contact
 
 For any inquiries or questions regarding this project, feel free to contact us:
-- [Divari Carlo](mailto:carlo.divari@studenti.unipd.it)
-- [Isotton Gloria](mailto:gloria.isotton@studenti.unipd.it)
-- [Sara Munafò](mailto:sara.munafo@studenti.unipd.it)
+- [Divari Carlo](mailto:carlo.divari@studenti.unipd.it);
+- [Isotton Gloria](mailto:gloria.isotton@studenti.unipd.it);
+- [Sara Munafò](mailto:sara.munafo@studenti.unipd.it).
 
 
  ## Useful links:
 Theory:
-- http://www.sfu.ca/~ssurjano/optimization.html
-- https://medium.com/@okanyenigun/step-by-step-guide-to-bayesian-optimization-a-python-based-approach-3558985c6818
-- https://towardsdatascience.com/bayesian-optimization-concept-explained-in-layman-terms-1d2bcdeaf12f
--https://towardsdatascience.com/the-intuitions-behind-bayesian-optimization-with-gaussian-processes-7e00fcc898a0 (Kernel dimensions)
+- http://www.sfu.ca/~ssurjano/optimization.html (known test functions database);
+- https://medium.com/@okanyenigun/step-by-step-guide-to-bayesian-optimization-a-python-based-approach-3558985c6818;
+- https://towardsdatascience.com/bayesian-optimization-concept-explained-in-layman-terms-1d2bcdeaf12f;
+- https://towardsdatascience.com/the-intuitions-behind-bayesian-optimization-with-gaussian-processes-7e00fcc898a0 (Kernel dimensions);
+- https://ekamperi.github.io/machine%20learning/2021/06/11/acquisition-functions.html (acquisition functions).
 
-Tutorial bayesian optimization:
-- https://arxiv.org/pdf/1807.02811.pdf
-
-Sequential MC:
-- https://jblevins.org/notes/smc-intro
-- https://diglib.eg.org/bitstream/handle/10.2312/SCA.SCA10.103-112/103-112.pdf?sequence=1&isAllowed=y
-
-Vihola algorithm
-- https://www.slideshare.net/xianblog/vihola
-- https://link.springer.com/article/10.1007/s11222-011-9269-5
+Slides
+- https://docs.google.com/presentation/d/1LfFytOBxcLFXgyDTgRGx3bXTWXQXZCVcOCvHQNfoPts/edit?usp=sharing
