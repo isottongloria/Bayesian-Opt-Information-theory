@@ -23,6 +23,7 @@ For any inquiries or questions regarding this project, feel free to contact us:
 
  ## Useful links:
 Theory:
+- original paper: https://arxiv.org/pdf/2203.01900.pdf
 - http://www.sfu.ca/~ssurjano/optimization.html (known test functions database);
 - https://medium.com/@okanyenigun/step-by-step-guide-to-bayesian-optimization-a-python-based-approach-3558985c6818;
 - https://towardsdatascience.com/bayesian-optimization-concept-explained-in-layman-terms-1d2bcdeaf12f;
